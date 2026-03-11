@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude mcp add:*)",
+      "Bash(npm install:*)",
+      "Bash(echo:*)",
+      "Bash(/usr/local/bin/npm install -g @anthropic-ai/claude-code)"
+    ]
+  }
+}
