@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiring Process Time Report</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #94a3b8;
+            --secondary-light: #cbd5e1;
+            
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.7);
+            
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,0.03) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,0.03) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,0.03) 0, transparent 50%);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 2.5rem;
+            min-height: 100vh;
+        }
+
+        header {
+            margin-bottom: 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeDown 0.6s ease-out;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h1 .icon-wrapper {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 0.5rem;
+            border-radius: 10px;
+            display: flex;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Controls / Filters */
+        .controls-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 1.75rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-glass);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            margin-bottom: 2.5rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            animation: fadeUp 0.6s ease-out 0.1s both;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            flex: 1;
+            min-width: 220px;
+            position: relative;
+        }
+
+        .input-group label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .input-group select, .input-group input {
+            padding: 0.875rem 1.25rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            transition: var(--transition);
+            background-color: rgba(255, 255, 255, 0.8);
+            color: var(--text-main);
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .input-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+            padding-right: 2.5rem;
+        }
+
+        .input-group select:focus, .input-group input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            background-color: #fff;
+        }
+
+        .input-group select:hover, .input-group input:hover {
+            border-color: var(--secondary);
+        }
+
+        .export-wrapper {
+            position: relative;
+        }
+
+        .btn {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            padding: 0.875rem 1.5rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--text-main);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            background-color: var(--bg-base);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+            color: white;
+        }
+
+        .export-menu {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            min-width: 260px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+            overflow: hidden;
+            padding: 0.5rem;
+        }
+
+        .export-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .export-menu button {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .export-menu button i {
+            color: var(--primary);
+        }
+
+        .export-menu button:hover {
+            background-color: var(--bg-base);
+            color: var(--primary-dark);
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            display: none; /* hidden by default */
+        }
+
+        .kpi-card {
+            background: var(--bg-surface);
+            padding: 1.75rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-light), var(--primary));
+            border-radius: 4px 0 0 4px;
+        }
+
+        .kpi-card.median::before {
+            background: linear-gradient(to bottom, var(--secondary-light), var(--secondary));
+        }
+
+        .kpi-card.alert::before {
+            background: linear-gradient(to bottom, #fde047, #eab308); /* Yellow gradient for longest stage */
+        }
+
+        .kpi-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .kpi-unit {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Chart Area */
+        .chart-wrapper {
+            background: var(--bg-surface);
+            padding: 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2.5rem;
+            display: none;
+            animation: fadeUp 0.6s ease-out both;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .chart-container {
+            height: 420px;
+            position: relative;
+        }
+
+        /* Empty State */
+        .empty-state {
+            background: var(--bg-glass);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px dashed rgba(148, 163, 184, 0.4);
+            border-radius: var(--radius-xl);
+            padding: 5rem 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .empty-icon-container {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), 0 8px 16px rgba(0,0,0,0.05);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            max-width: 450px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Tooltip customization for Chart.js via CSS */
+        #chartjs-tooltip {
+            opacity: 1;
+            position: absolute;
+            background: rgba(15, 23, 42, 0.95);
+            color: white;
+            border-radius: 8px;
+            pointer-events: none;
+            transform: translate(-50%, 0);
+            transition: all 0.1s ease;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(4px);
+        }
+        
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>
+            <div class="icon-wrapper">
+                <i data-lucide="bar-chart-2"></i>
+            </div>
+            Hiring Process Time
+        </h1>
+        <div class="export-wrapper">
+            <button class="btn" id="exportBtn" aria-haspopup="true" aria-expanded="false">
+                <i data-lucide="download" width="18" height="18"></i>
+                Export Report
+                <i data-lucide="chevron-down" width="18" height="18" style="margin-left: -2px;"></i>
+            </button>
+            <div class="export-menu" id="exportMenu" role="menu">
+                <button role="menuitem">
+                    <i data-lucide="file-spreadsheet" width="18" height="18"></i>
+                    Summary Data (.csv)
+                </button>
+                <button role="menuitem">
+                    <i data-lucide="users" width="18" height="18"></i>
+                    Detailed Candidates (.csv)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="controls-card">
+        <div class="input-group">
+            <label for="pipeline">
+                <i data-lucide="git-merge" width="16" height="16"></i>
+                Pipeline
+            </label>
+            <select id="pipeline">
+                <option value="">Select Pipeline...</option>
+                <option value="engineering">Engineering Pipeline</option>
+                <option value="sales">Sales Pipeline</option>
+                <option value="exec">Executive Pipeline</option>
+            </select>
+        </div>
+        <div class="input-group" id="vacancyGroup" style="opacity: 0.4; pointer-events: none;">
+            <label for="vacancy">
+                <i data-lucide="briefcase" width="16" height="16"></i>
+                Vacancy 
+                <span style="font-size: 0.75rem; font-weight: 500; opacity: 0.7;">(Optional)</span>
+            </label>
+            <select id="vacancy">
+                <option value="">All Vacancies</option>
+                <option value="v1">Senior Frontend Engineer</option>
+                <option value="v2">Backend Lead - Core</option>
+                <option value="v3">Staff Data Scientist</option>
+            </select>
+        </div>
+        <div class="input-group" id="mrfGroup" style="opacity: 0.4; pointer-events: none;">
+            <label for="mrf">
+                <i data-lucide="hash" width="16" height="16"></i>
+                MRF Number
+            </label>
+            <input type="text" id="mrf" placeholder="e.g. MRF-2026...">
+        </div>
+        <div class="input-group" style="flex: 0 0 auto; margin-bottom: 2px;">
+            <button class="btn btn-primary" id="applyFiltersBtn" style="height: 48px; padding: 0 2rem;">
+                <i data-lucide="filter" width="18" height="18"></i>
+                Apply
+            </button>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+        <div class="empty-icon-container">
+            <i data-lucide="pie-chart" width="40" height="40"></i>
+        </div>
+        <h3>No Data to Display</h3>
+        <p>Please select a Pipeline and apply filters to visualise the average and median time candidates spend at each hiring stage.</p>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card" style="animation: fadeUp 0.5s ease-out 0.1s both;">
+            <div class="kpi-title">
+                <i data-lucide="clock" width="16" height="16"></i>
+                Average Time to Hire
+            </div>
+            <div class="kpi-value" id="kpiAvg">-- <span class="kpi-unit">Days</span></div>
+        </div>
+        <div class="kpi-card median" style="animation: fadeUp 0.5s ease-out 0.2s both;">
+            <div class="kpi-title">
+                <i data-lucide="history" width="16" height="16" style="color: var(--secondary)"></i>
+                Median Time to Hire
+            </div>
+            <div class="kpi-value" id="kpiMedian">-- <span class="kpi-unit">Days</span></div>
+        </div>
+        <div class="kpi-card alert" style="animation: fadeUp 0.5s ease-out 0.3s both;">
+            <div class="kpi-title">
+                <i data-lucide="alert-circle" width="16" height="16" style="color: #eab308"></i>
+                Longest Stage Phase
+            </div>
+            <div class="kpi-value" id="kpiLongest" style="font-size: 1.875rem;">--</div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-wrapper" id="chartWrapper">
+        <div class="chart-header">
+            <div class="chart-title">Stage Duration Breakdown</div>
+            <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: var(--text-muted); font-weight: 500;">
+                <span style="display: flex; align-items: center; gap: 0.4rem;">
+                    <div style="width: 12px; height: 12px; background: var(--primary); border-radius: 3px;"></div> Average
+                </span>
+                <span style="display: flex; align-items: center; gap: 0.4rem;">
+                    <div style="width: 12px; height: 12px; background: var(--secondary); border-radius: 3px;"></div> Median
+                </span>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="timeChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // UI Interactions
+        const exportBtn = document.getElementById('exportBtn');
+        const exportMenu = document.getElementById('exportMenu');
+        const pipelineSelect = document.getElementById('pipeline');
+        const vacancyGroup = document.getElementById('vacancyGroup');
+        const mrfGroup = document.getElementById('mrfGroup');
+        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+        
+        const emptyState = document.getElementById('emptyState');
+        const kpiGrid = document.getElementById('kpiGrid');
+        const chartWrapper = document.getElementById('chartWrapper');
+        
+        // Toggle Export Menu
+        exportBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isExpanded = exportBtn.getAttribute('aria-expanded') === 'true';
+            exportBtn.setAttribute('aria-expanded', !isExpanded);
+            exportMenu.classList.toggle('active');
+        });
+
+        // Close menu onClick outside
+        document.addEventListener('click', (e) => {
+            if (!exportMenu.contains(e.target)) {
+                exportBtn.setAttribute('aria-expanded', 'false');
+                exportMenu.classList.remove('active');
+            }
+        });
+
+        // Pipeline selection unlocks vacancy/MRF
+        pipelineSelect.addEventListener('change', (e) => {
+            if(e.target.value !== "") {
+                vacancyGroup.style.opacity = '1';
+                vacancyGroup.style.pointerEvents = 'auto';
+                mrfGroup.style.opacity = '1';
+                mrfGroup.style.pointerEvents = 'auto';
+            } else {
+                vacancyGroup.style.opacity = '0.4';
+                vacancyGroup.style.pointerEvents = 'none';
+                mrfGroup.style.opacity = '0.4';
+                mrfGroup.style.pointerEvents = 'none';
+            }
+        });
+
+        // Add some nice gradient colors to the chart
+        function getGradient(ctx, chartArea, colorStart, colorEnd) {
+            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+            gradient.addColorStop(0, colorStart);
+            gradient.addColorStop(1, colorEnd);
+            return gradient;
+        }
+
+        let timeChart = null;
+
+        applyFiltersBtn.addEventListener('click', () => {
+            if(pipelineSelect.value === "") {
+                // Shake animation for error
+                pipelineSelect.parentElement.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400, easing: 'ease-in-out' });
+                return;
+            }
+
+            // Button loading state
+            const originalContent = applyFiltersBtn.innerHTML;
+            applyFiltersBtn.innerHTML = '<i data-lucide="loader-2" class="spin" width="18" height="18"></i> Loading';
+            lucide.createIcons();
+            applyFiltersBtn.style.opacity = '0.8';
+
+            setTimeout(() => {
+                applyFiltersBtn.innerHTML = originalContent;
+                applyFiltersBtn.style.opacity = '1';
+                lucide.createIcons();
+
+                // Hide empty state, show data
+                emptyState.style.display = 'none';
+                kpiGrid.style.display = 'grid';
+                chartWrapper.style.display = 'block';
+
+                // Set KPIs with a count-up animation for impact
+                animateValue('kpiAvg', 0, 28.4, 1000, ' <span class="kpi-unit">Days</span>');
+                animateValue('kpiMedian', 0, 22.0, 1000, ' <span class="kpi-unit">Days</span>');
+                document.getElementById('kpiLongest').textContent = 'Technical Interview';
+
+                renderChart();
+            }, 600);
+        });
+
+        // Simple number counter animation
+        function animateValue(id, start, end, duration, suffix = '') {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Ease out quint
+                const easeOut = 1 - Math.pow(1 - progress, 5);
+                const current = (start + easeOut * (end - start)).toFixed(1);
+                document.getElementById(id).innerHTML = current + suffix;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Apply a global style for spinning icon
+        const style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = '@keyframes spin { 100% { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }';
+        document.getElementsByTagName('head')[0].appendChild(style);
+
+
+        function renderChart() {
+            const ctx = document.getElementById('timeChart').getContext('2d');
+            
+            if(timeChart) {
+                timeChart.destroy();
+            }
+
+            Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+            Chart.defaults.color = '#94a3b8';
+
+            timeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sourced', 'Applied', 'Phone Screen', 'Technical Interview', 'Culture Fit', 'Offer'],
+                    datasets: [
+                        {
+                            label: 'Average Time (Days)',
+                            data: [3.2, 1.8, 4.5, 12.4, 4.8, 1.7],
+                            backgroundColor: function(context) {
+                                const chart = context.chart;
+                                const {ctx, chartArea} = chart;
+                                if (!chartArea) { return '#6366f1'; }
+                                return getGradient(ctx, chartArea, '#4f46e5', '#818cf8');
+                            },
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            barPercentage: 0.85,
+                            categoryPercentage: 0.7,
+                            hoverBackgroundColor: '#4f46e5'
+                        },
+                        {
+                            label: 'Median Time (Days)',
+                            data: [2.0, 1.0, 3.0, 9.0, 4.0, 1.0],
+                            backgroundColor: function(context) {
+                                const chart = context.chart;
+                                const {ctx, chartArea} = chart;
+                                if (!chartArea) { return '#e2e8f0'; }
+                                return getGradient(ctx, chartArea, '#94a3b8', '#cbd5e1');
+                            },
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            barPercentage: 0.85,
+                            categoryPercentage: 0.7,
+                            hoverBackgroundColor: '#94a3b8'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false // we built a custom legend in HTML above
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 14, family: "'Plus Jakarta Sans', sans-serif", weight: '600' },
+                            bodyFont: { size: 14, family: "'Plus Jakarta Sans', sans-serif", weight: '500' },
+                            padding: 16,
+                            cornerRadius: 12,
+                            displayColors: true,
+                            boxPadding: 6,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y} Days`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(226, 232, 240, 0.5)',
+                                drawBorder: false,
+                                tickLength: 0
+                            },
+                            ticks: {
+                                padding: 12,
+                                font: { size: 12, weight: '500' }
+                            },
+                            border: { display: false }
+                        },
+                        x: {
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                padding: 12,
+                                font: { size: 13, weight: '600' },
+                                color: '#475569'
+                            },
+                            border: { display: false }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
